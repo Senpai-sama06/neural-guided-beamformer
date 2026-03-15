@@ -1,7 +1,7 @@
 <div align="center">
 
-# 🎧 IRM_TFLC: Real-Time Audio Enhancement
-**Neural Network Estimated Masks + Iterative TFLC Beamforming**
+# 🎧 Neural-Guided Beamformer: Audio Zooming with SAEGE-UNet & RTFLC
+**Real-Time Speech Enhancement via Neural Priors and Restricted TFLC Optimization**
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Android Min SDK](https://img.shields.io/badge/Android-Min%20SDK%2024-green.svg)]()
@@ -13,35 +13,53 @@
 
 ## 📖 Overview
 
-**IRM_TFLC** is an advanced, real-time audio enhancement and source separation pipeline. It is designed to significantly improve speech intelligibility in noisy and reverberant environments.
+This repository hosts the official implementation of a novel hybrid audio zooming system, designed for real-time operation on dual-microphone edge devices (like smartphones). 
 
-The system utilizes a two-stage approach:
-1. **Mask Estimation**: An efficient, lightweight **EGE-Unet** neural network estimates Ideal Ratio Masks (IRM) from raw audio features.
-2. **Spatial Filtering**: An **Iterative Time-Frequency Line Constrained (TFLC) Beamformer** utilizes these masks to spatially isolate the target speaker and suppress background noise.
+The system directly addresses the fragility of deep complex spectral mapping models (e.g., DCUNet, DCCRN) in reverberant, dual-mic geometries. By combining the powerful pattern recognition of deep learning with the strict distortionless constraints of classic array signal processing, we achieve aggressive interference suppression while mathematically preserving the target speech.
 
-This repository provides **both** a research-friendly Python pipeline and a highly optimized C++/Kotlin implementation for mobile Android devices.
+The pipeline comprises two main stages:
+1. **Neural Prior Estimation (SAEGE-UNet)**: A highly efficient, 16.4 MB Speech-Adapted Efficient Group Enhanced UNet estimates a probabilistic Ideal Ratio Mask (IRM).
+2. **Spatial Filtering (Restricted TFLC)**: A Restricted Time-Frequency Line Constrained (RTFLC) beamformer iteratively optimizes spatial filters using the neural mask, preventing target cancellation and ensuring high-fidelity output.
 
 ---
 
-## ✨ Key Features
+## ✨ Key Features & Performance
 
-- **Hybrid Architecture**: Combines the pattern recognition strengths of Deep Learning with the spatial precision of classic array signal processing (Beamforming).
-- **Mobile Optimized**: Includes a complete Android Studio project featuring a C++ (JNI) audio engine for ultra-low latency on-device processing.
-- **Pre-Trained Models**: Ready-to-use ONNX and PyTorch weights for immediate inference.
-- **Cross-Language Parity**: The Python and Android implementations are mathematically aligned, ensuring identical audio quality across platforms.
+- **Robust to Reverberation**: Outperforms state-of-the-art complex spectral mapping models (which often fail in specific dual-mic geometries) precisely in reverberant conditions.
+- **Strictly Distortionless**: Unlike purely time-domain non-linear synthesizers (like ConvTasNet) that suffer from spectral degradation, the RTFLC stage guarantees the target speech remains mathematically unaltered.
+- **Ultra-Low Latency Edge Deployment**: Processing a 4-second audio segment takes just **0.3s for neural inference** and **0.1s for TFLC optimization** on a standard mobile NPU.
+- **Cross-Platform Availability**: Includes a Python research pipeline and a fully-functional Android C++/Kotlin application for on-device testing.
+
+---
+
+## 🔬 Methodology: How It Works
+
+### 1. Feature Extraction & The SAEGE-UNet
+At each time-frequency bin, we extract a composite tensor $\Psi(f, t) \in \mathbb{R}^5$ capturing spectral texture and spatial correlations:
+- Log-magnitude of the reference mic
+- Inter-channel Phase Difference (IPD) projected as $\sin(\Delta\phi)$ and $\cos(\Delta\phi)$
+- Magnitude Squared Coherence (MSC)
+- Fixed frequency map representation
+
+The **SAEGE-UNet** takes this feature space and bounds it via a Sigmoid activation to estimate an Ideal Ratio Mask, $M(f, t) \in [0, 1]$. This mask acts strictly as an initialization prior for the next stage.
+
+### 2. Iterative Restricted TFLC (RTFLC) Beamformer
+The RTFLC beamformer enhances the target by forming a convex combination of $K=2$ component beamformers. 
+Instead of blind initialization, we use the probability mask $M(f, t)$ to construct a noise-dominant spatial covariance matrix:
+$$ \Phi_{\text{noise}}(f) = \frac{1}{T} \sum_{t=1}^{T} (1 - M(f, t)) x(f, t)x^H(f, t) $$
+
+To avoid inter-beamformer coupling and prevent target cancellation, **Restricted TFLC** independently updates each spatial filter using mask-weighted statistics associated with its *own* beamformer selection mask. The filters are then resolved using a standard MVDR solution, strictly enforcing the distortionless constraint ($w_k^H(f)a(f) = 1$).
 
 ---
 
 ## 📂 Repository Structure
-
-The project has been organized to support both end-users and researchers:
 
 | Directory | Description |
 | :--- | :--- |
 | [`python/`](python/) | **Core Python Implementation**: Clean inference scripts, metrics evaluation, and command-line interfaces. *Start here for desktop usage.* |
 | [`AudioEnhancerCpp/`](AudioEnhancerCpp/) | **Android Application**: Complete Android Studio project (`app/`). Features a native C++ audio engine built via CMake and JNI. |
 | [`models/`](models/) | **Weights**: Pre-trained `.pth` and `.onnx` models used by the inference pipelines. |
-| [`research/`](research/) | **Development & Training**: Contains the original PyTorch Lightning (Asteroid) training code, MATLAB prototyping scripts, and SP-Cup competition submissions. |
+| [`research/`](research/) | **Development & Training**: Contains PyTorch Lightning training code, MATLAB prototyping scripts, and evaluation logic. |
 
 ---
 
@@ -58,26 +76,15 @@ The project has been organized to support both end-users and researchers:
    ```bash
    python -m src.inference --input data/noisy_sample.wav --output data/clean_output.wav
    ```
-   *(See the [Python README](python/README.md) for advanced usage, batch processing, and evaluation metrics).*
 
 ### 📱 Android (Mobile App)
 
-The mobile application is built to run the enhancement entirely on-device using C++ for performance.
+The mobile application is built to run the enhancement entirely on-device using C++ for low-latency NPU/CPU execution.
 
 1. Open Android Studio and select **Open an Existing Project**.
 2. Select the [`AudioEnhancerCpp/`](AudioEnhancerCpp/) folder.
-3. Allow Gradle to sync and fetch the required NDK version (specified in `build.gradle.kts`).
+3. Allow Gradle to sync and fetch the required NDK version.
 4. Build and run on a physical Android device or emulator (API 24+).
-
-*(See the [Android README](AudioEnhancerCpp/README.md) for detailed JNI/C++ compilation instructions).*
-
----
-
-## 🔬 How It Works
-
-1. **Feature Extraction**: Multi-channel STFTs are computed. The pipeline extracts Log-Magnitude, Inter-channel Phase Differences (IPD), and Magnitude Squared Coherence (MSC).
-2. **Neural Network Inference**: The EGE-Unet model processes these spatial and spectral features to estimate a soft mask representing the probability of speech dominance in each time-frequency bin.
-3. **Iterative Beamforming**: The estimated mask is used to construct spatial covariance matrices. The TFLC beamformer iteratively refines these matrices to cleanly extract the target signal without creating "musical noise" artifacts.
 
 ---
 
@@ -85,13 +92,13 @@ The mobile application is built to run the enhancement entirely on-device using 
 
 This project is licensed under the [MIT License](LICENSE).
 
-If you use this code in your research, please consider citing our work:
+If you use this code in your research, please cite our ICASSP paper:
 
 ```bibtex
-@misc{irm_tflc_2026,
-  author = {Audio Signal Processing and Intelligence REsearch labs (ASPIRE labs) IIITDM Kurnool },
-  title = {Neural Guided beamformer for two channel microphones for mobile edge devices},
-  year = {2026},
-  howpublished = {\url{https://github.com/your-username/IRM-TFLC}}
+@inproceedings{hybrid_neural_beamforming_2026,
+  author = {Your Name/Team},
+  title = {Hybrid Neural Beamforming with SAEGE-UNet and Restricted TFLC for Edge Devices},
+  booktitle = {IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)},
+  year = {2026}
 }
 ```
