@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["neural_beamformer*"]
+
+[project]
+name = "neural_beamformer"
+version = "0.1.0"
+authors = [
+  { name="Audio Signal Processing Intelligence and REsearch Labs (ASPIRE)", email="author@example.com" },
+]
+description = "Hybrid Neural Guided Beamforming for Edge Devices"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "torch>=2.0.0",
+    "numpy>=1.20",
+    "soundfile>=0.12.1",
+    "scipy>=1.7.0",
+    "matplotlib>=3.5.0"
+]
+
+[project.scripts]
+enhance-audio = "neural_beamformer.cli:main"
