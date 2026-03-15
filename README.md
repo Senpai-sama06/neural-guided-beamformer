@@ -93,13 +93,15 @@ The mobile application is built to run the enhancement entirely on-device using 
 
 This project is licensed under the [MIT License](LICENSE).
 
-If you use this code in your research, please cite our ICASSP paper:
+To use this code in your research, please cite our work as:
 
 ```bibtex
-@inproceedings{hybrid_neural_beamforming_2026,
-  author = {Audio Signal Processing Intelligence and REsearch Labs (ASPIRE), Indian Institute of Information Technology Design and Manufacturing Kurnool},
-  title = {Hybrid Neural Beamforming with SAEGE-UNet and Restricted TFLC for Edge Devices},
-  booktitle = {IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)},
-  year = {2026}
+@misc{hybrid_neural_beamforming_2026,
+  author = {{Audio Signal Processing Intelligence and REsearch Labs (ASPIRE), Indian Institute of Information Technology Design and Manufacturing Kurnool}},
+  title = {Hybrid Neural Guided Beamforming for Edge Devices},
+  year = {2026},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/Senpai-sama06/neural-guided-beamformer}}
 }
 ```
