@@ -13,26 +13,27 @@
 
 ## 📖 Overview
 
-This repository hosts the official implementation of a novel hybrid audio zooming system, designed for real-time operation on dual-microphone edge devices (like smartphones). 
+This is the official implementation of a hybrid audio enhancement system, for real-time operation on dual-microphone edge devices (with smartphone like form-factors). 
 
-The system directly addresses the fragility of deep complex spectral mapping models (e.g., DCUNet, DCCRN) in reverberant, dual-mic geometries. By combining the powerful pattern recognition of deep learning with the strict distortionless constraints of classic array signal processing, we achieve aggressive interference suppression while mathematically preserving the target speech.
+<!-- The system directly addresses the fragility of deep complex spectral mapping models (e.g., DCUNet, DCCRN) in reverberant, dual-mic geometries. By combining the powerful pattern recognition of deep learning with the strict distortionless constraints of classic array signal processing, we achieve aggressive interference suppression while mathematically preserving the target speech. -->
 
 The pipeline comprises two main stages:
-1. **Neural Prior Estimation (SAEGE-UNet)**: A highly efficient, 16.4 MB Speech-Adapted Efficient Group Enhanced UNet estimates a probabilistic Ideal Ratio Mask (IRM).
-2. **Spatial Filtering (Restricted TFLC)**: A Restricted Time-Frequency Line Constrained (RTFLC) beamformer iteratively optimizes spatial filters using the neural mask, preventing target cancellation and ensuring high-fidelity output.
+1. **Neural Priori**: A Speech-Adapted Efficient Group Enhanced UNet estimates a probabilistic Ideal Ratio Mask (IRM).
+2. **Spatial Filtering**: A beamforming backend, which iteratively optimizes spatial filters using the neural priors.
 
 ---
 
 ## ✨ Key Features & Performance
 
-- **Robust to Reverberation**: Outperforms state-of-the-art complex spectral mapping models (which often fail in specific dual-mic geometries) precisely in reverberant conditions.
-- **Strictly Distortionless**: Unlike purely time-domain non-linear synthesizers (like ConvTasNet) that suffer from spectral degradation, the RTFLC stage guarantees the target speech remains mathematically unaltered.
-- **Ultra-Low Latency Edge Deployment**: Processing a 4-second audio segment takes just **0.3s for neural inference** and **0.1s for TFLC optimization** on a standard mobile NPU.
-- **Cross-Platform Availability**: Includes a Python research pipeline and a fully-functional Android C++/Kotlin application for on-device testing.
+- **Robust to Reverberation**: Outperforms state-of-the-art complex spectral mapping models. Benchmarks available.
+- **Strictly Distortionless**: Unlike purely time-domain non-linear synthesizers (like ConvTasNet) that suffer from spectral degradation, the spatial filtering stage guarantees the target speech remains unaltered.
+- **Low-Latency and Edge compatible**
+<!-- - **Low Latency Edge Deployment**: Processing a 4-second audio segment takes just **0.3s for neural inference** and **0.1s for TFLC optimization** on a standard mobile NPU. -->
+<!-- - **Cross-**: Includes a Python research pipeline and a fully-functional Android C++/Kotlin application for on-device testing. -->
 
 ---
 
-## 🔬 Methodology: How It Works
+<!-- ## 🔬 Methodology: How It Works
 
 ### 1. Feature Extraction & The SAEGE-UNet
 At each time-frequency bin, we extract a composite tensor $\Psi(f, t) \in \mathbb{R}^5$ capturing spectral texture and spatial correlations:
@@ -50,7 +51,7 @@ $$ \Phi_{\text{noise}}(f) = \frac{1}{T} \sum_{t=1}^{T} (1 - M(f, t)) x(f, t)x^H(
 
 To avoid inter-beamformer coupling and prevent target cancellation, **Restricted TFLC** independently updates each spatial filter using mask-weighted statistics associated with its *own* beamformer selection mask. The filters are then resolved using a standard MVDR solution, strictly enforcing the distortionless constraint ($w_k^H(f)a(f) = 1$).
 
----
+--- -->
 
 ## 📂 Repository Structure
 
@@ -96,7 +97,7 @@ If you use this code in your research, please cite our ICASSP paper:
 
 ```bibtex
 @inproceedings{hybrid_neural_beamforming_2026,
-  author = {Your Name/Team},
+  author = {Audio Signal Processing Intelligence and REsearch Labs (ASPIRE), Indian Institute of Information Technology Design and Manufacturing Kurnool},
   title = {Hybrid Neural Beamforming with SAEGE-UNet and Restricted TFLC for Edge Devices},
   booktitle = {IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)},
   year = {2026}
