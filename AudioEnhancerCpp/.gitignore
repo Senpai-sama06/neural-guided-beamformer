@@ -1,0 +1,27 @@
+# ===== Android / Gradle =====
+.gradle/
+build/
+app/build/
+build.log
+local.properties
+
+# ===== Native build =====
+.cxx/
+.externalNativeBuild/
+
+# ===== Third-party =====
+app/src/main/cpp/include/Eigen/
+
+*.txt
+*.wav
+*.bin
+
+# Build and Debug Artifacts
+enigma_venv/
+linux_build/
+.idea/
+test_fft*
+test_window*
+gen_fft_test.py
+compare.py
+debug_comparison/python/debug_src_runner.py
