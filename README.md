@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎧 Neural-Guided Beamformer: Audio Zooming with SAEGE-UNet & RTFLC
+# Neural-Guided Beamformer
 **Real-Time Speech Enhancement via Neural Priors and Restricted TFLC Optimization**
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
